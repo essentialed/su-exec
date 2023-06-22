@@ -80,10 +80,15 @@ int main(int argc, char *argv[])
 	} else {
 		int ngroups = 0;
 		gid_t *glist = NULL;
-
 		while (1) {
-			int r = getgrouplist(pw->pw_name, gid, glist, &ngroups);
-
+/*
+//			Following cast to (int *) required to succuessfully build on OSX M1
+*/
+#ifdef __aarch64__
+			int r = getgrouplist(pw->pw_name, gid, (int *) glist, &ngroups);
+#else
+                        int r = getgrouplist(pw->pw_name, gid, glist, &ngroups);
+#endif
 			if (r >= 0) {
 				if (setgroups(ngroups, glist) < 0)
 					err(1, "setgroups");
